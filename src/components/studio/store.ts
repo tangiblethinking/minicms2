@@ -40,7 +40,7 @@ type StudioState = {
   setViewport: (viewport: Viewport) => void;
   setDeleteOpen: (open: boolean) => void;
   updateColor: (id: string, patch: Partial<Pick<ColorToken, "name" | "value">>) => void;
-  updateFont: (id: string, patch: Partial<Pick<FontToken, "name" | "stack">>) => void;
+  updateFont: (id: string, patch: Partial<Pick<FontToken, "name" | "stack" | "source">>) => void;
   updateType: (id: string, patch: Partial<Omit<TypeStyle, "id">>) => void;
   updateSpacing: (
     group: "padding" | "gap" | "margin",

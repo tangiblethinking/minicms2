@@ -1,4 +1,5 @@
 import * as Dialog from "@radix-ui/react-dialog";
+import { fontStackFor, googleFontStylesheet } from "@/lib/design-system/fonts";
 import { groupMeta } from "@/lib/design-system/model";
 import { HexControl, NumberControl, SelectControl, SwappableLengthControl, TextControl, TypeSizeControl } from "./controls";
 import { typeEquivalents } from "@/lib/design-system/units";
@@ -60,9 +61,27 @@ export function SelectionPane() {
               <TextControl
                 label="Stack"
                 value={selection.item.stack}
-                hint={selection.item.stack}
+                hint="Family name first, then fallbacks. The sample paints this list."
                 onChange={(stack) => updateFont(selection.item.id, { stack })}
               />
+              <TextControl
+                label="Source URL"
+                value={selection.item.source}
+                hint="Google Fonts stylesheet, or an https .woff2, .woff, .ttf, or .otf file. The sample loads it."
+                onChange={(source) => updateFont(selection.item.id, { source })}
+              />
+              <button
+                type="button"
+                className="inline-flex min-h-11 w-full items-center justify-center rounded-control border border-line bg-studio px-3 text-center text-sm font-semibold text-ink"
+                onClick={() =>
+                  updateFont(selection.item.id, {
+                    stack: fontStackFor(selection.item.name),
+                    source: googleFontStylesheet(selection.item.name),
+                  })
+                }
+              >
+                Load {selection.item.name || "this family"} from Google Fonts
+              </button>
             </>
           ) : null}
           {selection.group === "type" ? (

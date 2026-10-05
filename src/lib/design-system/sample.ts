@@ -5,6 +5,7 @@ import {
   type DesignSystemFile,
   type SpacingToken,
 } from "./model.ts";
+import { fontFaceFamily, safeFontSource } from "./fonts.ts";
 import { cssLength, lengthEquivalents, readUnitSettings, typeSizeCss } from "./units.ts";
 
 export type Viewport = "mobile" | "desktop";
@@ -14,6 +15,7 @@ export type SampleMessage = {
   vars: Record<string, string>;
   theme: string;
   swatches: { name: string; color: string }[];
+  fonts: { name: string; family: string; source: string }[];
   types: {
     name: string;
     tag: string;
@@ -109,6 +111,11 @@ export function buildSampleMessage(file: DesignSystemFile, viewport: Viewport): 
     swatches: file.colors.map((color) => ({
       name: color.name,
       color: safeColor(color.value),
+    })),
+    fonts: file.fonts.map((font) => ({
+      name: font.name,
+      family: fontFaceFamily(font.name, font.stack),
+      source: safeFontSource(font.source ?? ""),
     })),
     types: file.typeStyles.map((style) => {
       const font = file.fonts.find((item) => item.id === style.fontId) ?? file.fonts[0];

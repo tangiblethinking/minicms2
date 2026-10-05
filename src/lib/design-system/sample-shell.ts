@@ -91,8 +91,29 @@ export const SAMPLE_SHELL = `<!doctype html>
         if (text != null) node.textContent = text;
         return node;
       }
+      function loadFonts(fonts) {
+        document.querySelectorAll("[data-cc-font]").forEach(function (node) { node.remove(); });
+        (fonts || []).forEach(function (font) {
+          if (!font || typeof font.source !== "string" || font.source.indexOf("https://") !== 0) return;
+          var file = font.source.match(/\.(woff2|woff|ttf|otf)(?:$|[?#])/i);
+          if (file) {
+            var format = file[1].toLowerCase() === "ttf" ? "truetype" : file[1].toLowerCase() === "otf" ? "opentype" : file[1].toLowerCase();
+            var style = document.createElement("style");
+            style.setAttribute("data-cc-font", "");
+            style.textContent = "@font-face{font-family:" + JSON.stringify(font.family || font.name) + ";src:url(" + JSON.stringify(font.source) + ") format(" + JSON.stringify(format) + ");font-weight:100 900;font-style:normal;font-display:swap;}";
+            document.head.appendChild(style);
+            return;
+          }
+          var link = document.createElement("link");
+          link.rel = "stylesheet";
+          link.href = font.source;
+          link.setAttribute("data-cc-font", "");
+          document.head.appendChild(link);
+        });
+      }
       function apply(msg) {
         if (!msg || msg.type !== "cc-sample" || !msg.vars) return;
+        loadFonts(msg.fonts);
         var style = document.documentElement.style;
         Object.keys(msg.vars).forEach(function (key) {
           if (key.indexOf("--") === 0 && typeof msg.vars[key] === "string") {

@@ -1,3 +1,4 @@
+import { safeFontSource } from "./fonts.ts";
 import { defaultUnitSettings, readUnitSettings, type UnitSettings } from "./units.ts";
 
 export type { UnitSettings };
@@ -20,7 +21,7 @@ const HEX = /^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/;
 const LENGTH = /^(?:0|[1-9]\d{0,3})(?:\.\d{1,3})?(?:px|rem|em|pt|%)$/;
 
 export type ColorToken = { id: string; name: string; value: string };
-export type FontToken = { id: string; name: string; stack: string };
+export type FontToken = { id: string; name: string; stack: string; source: string };
 export type TypeStyle = {
   id: string;
   name: string;
@@ -159,8 +160,8 @@ export function openingDesignSystem(): DesignSystemFile {
       { id: "color-surface", name: "Surface", value: "#ffffff" },
     ],
     fonts: [
-      { id: "font-sans", name: "Sans", stack: SANS_STACK },
-      { id: "font-display", name: "Display", stack: SANS_STACK },
+      { id: "font-sans", name: "Sans", stack: SANS_STACK, source: "" },
+      { id: "font-display", name: "Display", stack: SANS_STACK, source: "" },
     ],
     typeStyles: [
       typeStyle("type-h1", "H1", "h1", 32, 600),
@@ -273,7 +274,13 @@ function readFonts(value: unknown): FontToken[] | null {
     if (typeof item.id !== "string" || item.id.length === 0) return null;
     if (typeof item.name !== "string") return null;
     if (typeof item.stack !== "string" || item.stack.trim().length === 0) return null;
-    fonts.push({ id: item.id, name: item.name, stack: item.stack.trim() });
+    if (item.source != null && typeof item.source !== "string") return null;
+    fonts.push({
+      id: item.id,
+      name: item.name,
+      stack: item.stack.trim(),
+      source: safeFontSource(typeof item.source === "string" ? item.source : ""),
+    });
   }
   return fonts;
 }
@@ -379,7 +386,7 @@ export function sanitizeDesignSystem(file: DesignSystemFile): DesignSystemFile {
   return {
     ...file,
     colors: file.colors.map((color) => ({ ...color, value: safeColor(color.value) })),
-    fonts: file.fonts.map((font) => ({ ...font, stack: safeStack(font.stack) })),
+    fonts: file.fonts.map((font) => ({ ...font, stack: safeStack(font.stack), source: safeFontSource(font.source ?? "") })),
     spacing: {
       padding: file.spacing.padding.map(sanitizeSpacing),
       gap: file.spacing.gap.map(sanitizeSpacing),
@@ -517,7 +524,7 @@ export function addToGroup(file: DesignSystemFile, group: GroupId): { file: Desi
     );
     return {
       id,
-      file: { ...file, fonts: [...file.fonts, { id, name, stack: SANS_STACK }] },
+      file: { ...file, fonts: [...file.fonts, { id, name, stack: SANS_STACK, source: "" }] },
     };
   }
   if (group === "type") {
