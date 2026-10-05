@@ -13,22 +13,29 @@ export const SAMPLE_SHELL = `<!doctype html>
       --margin: 32px;
       --pad: 24px;
       --gap: 12px;
-      --radius: 1rem;
+      --radius: 16px;
+      --root-px: 16px;
       color: var(--ink);
       background: var(--surface);
       font-family: ui-sans-serif, system-ui, sans-serif;
+      font-size: var(--root-px);
     }
     * { box-sizing: border-box; }
+    html, body, #root { height: 100%; }
     body { margin: 0; }
     .screen {
-      min-height: 100vh;
-      padding: 28px var(--margin);
-      background: color-mix(in srgb, var(--ink) 7%, var(--surface));
+      height: 100%;
+      min-height: 100%;
+      padding: 0;
+      background: var(--surface);
     }
     .page {
+      height: 100%;
+      width: 100%;
+      overflow: auto;
       background: var(--surface);
-      border-radius: var(--radius);
-      padding: 20px;
+      border-radius: 0;
+      padding: var(--pad);
     }
     .swatches { display: flex; flex-wrap: wrap; gap: var(--gap); }
     .swatch { width: 4.75rem; }
@@ -114,7 +121,7 @@ export const SAMPLE_SHELL = `<!doctype html>
           line.setAttribute("data-style", typeStyle.name);
           line.setAttribute("data-font", typeStyle.fontName);
           line.style.fontFamily = typeStyle.family;
-          line.style.fontSize = String(typeStyle.sizePt) + "pt";
+          line.style.fontSize = typeStyle.sizeCss || (String(typeStyle.sizePt) + "px");
           line.style.lineHeight = String(typeStyle.lineHeight);
           line.style.fontWeight = String(typeStyle.weight);
           line.style.margin = "0";

@@ -37,7 +37,7 @@ export function SamplePane() {
           sandbox="allow-scripts"
           srcDoc={SAMPLE_SHELL}
           onLoad={() => frameRef.current?.contentWindow?.postMessage(payload, "*")}
-          className="absolute inset-3 rounded-studio border border-line bg-studio"
+          className="absolute inset-0 h-full w-full border-0 bg-studio"
           data-h1-size={h1?.sizePt ?? ""}
           data-h1-font={h1Font?.name ?? ""}
           data-h1-stack={h1Font?.stack ?? ""}

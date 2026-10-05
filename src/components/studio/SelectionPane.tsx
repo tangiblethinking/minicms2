@@ -1,6 +1,7 @@
 import * as Dialog from "@radix-ui/react-dialog";
 import { groupMeta } from "@/lib/design-system/model";
-import { HexControl, LengthControl, NumberControl, SelectControl, TextControl } from "./controls";
+import { HexControl, NumberControl, SelectControl, SwappableLengthControl, TextControl, TypeSizeControl } from "./controls";
+import { typeEquivalents } from "@/lib/design-system/units";
 import { useSelection, useStudio } from "./store";
 
 export function SelectionPane() {
@@ -13,7 +14,9 @@ export function SelectionPane() {
   const updateType = useStudio((state) => state.updateType);
   const updateSpacing = useStudio((state) => state.updateSpacing);
   const updateRadius = useStudio((state) => state.updateRadius);
+  const updateUnits = useStudio((state) => state.updateUnits);
   const removeSelected = useStudio((state) => state.removeSelected);
+  const units = file.units;
 
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-y-auto px-4 py-4">
@@ -89,15 +92,14 @@ export function SelectionPane() {
                   <option value={selection.item.fontId}>Missing font</option>
                 )}
               </SelectControl>
-              <NumberControl
-                label="Size"
-                value={selection.item.sizePt}
-                hint={`${selection.item.sizePt}pt`}
-                min={1}
-                max={400}
-                step={1}
-                onChange={(sizePt) => updateType(selection.item.id, { sizePt })}
+              <TypeSizeControl
+                sizePt={selection.item.sizePt}
+                unit={units.typeUnit}
+                settings={units}
+                onChangePt={(sizePt) => updateType(selection.item.id, { sizePt })}
+                onUnit={(typeUnit) => updateUnits({ typeUnit })}
               />
+              <p className="text-sm text-muted tabular-nums">{typeEquivalents(selection.item.sizePt, units)}</p>
               <NumberControl
                 label="Line height"
                 value={selection.item.lineHeight}
@@ -125,15 +127,23 @@ export function SelectionPane() {
                 hint={`${selection.item.name || "Rule"} · ${selection.item.mobile} / ${selection.item.desktop}`}
                 onChange={(name) => updateSpacing(selection.group, selection.item.id, { name })}
               />
-              <LengthControl
+              <SwappableLengthControl
                 label="Mobile"
                 value={selection.item.mobile}
+                unit={units.spacingUnit}
+                kind="spacing"
+                settings={units}
                 onChange={(mobile) => updateSpacing(selection.group, selection.item.id, { mobile })}
+                onUnit={(spacingUnit) => updateUnits({ spacingUnit }, "spacing")}
               />
-              <LengthControl
+              <SwappableLengthControl
                 label="Desktop"
                 value={selection.item.desktop}
+                unit={units.spacingUnit}
+                kind="spacing"
+                settings={units}
                 onChange={(desktop) => updateSpacing(selection.group, selection.item.id, { desktop })}
+                onUnit={(spacingUnit) => updateUnits({ spacingUnit }, "spacing")}
               />
             </>
           ) : null}
@@ -144,10 +154,14 @@ export function SelectionPane() {
                 value={selection.item.name}
                 onChange={(name) => updateRadius(selection.item.id, { name })}
               />
-              <LengthControl
+              <SwappableLengthControl
                 label="Value"
                 value={selection.item.value}
+                unit={units.radiusUnit}
+                kind="radius"
+                settings={units}
                 onChange={(value) => updateRadius(selection.item.id, { value })}
+                onUnit={(radiusUnit) => updateUnits({ radiusUnit }, "radius")}
               />
               <p className="text-sm text-muted tabular-nums">
                 {selection.item.name || "Radius"} · {selection.item.value}

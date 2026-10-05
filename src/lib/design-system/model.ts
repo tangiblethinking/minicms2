@@ -1,3 +1,7 @@
+import { defaultUnitSettings, readUnitSettings, type UnitSettings } from "./units.ts";
+
+export type { UnitSettings };
+
 export const SCHEMA_VERSION = 2 as const;
 export const TAILWIND_VERSION = "4.3" as const;
 export const DESIGN_SYSTEM_FILE_NAME = "design-system.tpsds.json";
@@ -13,7 +17,7 @@ export const EXPORTED_DESIGN_SYSTEM = "Exported design-system.tpsds.json.";
 export const IMPORTED_DESIGN_SYSTEM = "Imported design-system.tpsds.json.";
 
 const HEX = /^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/;
-const LENGTH = /^(?:0|[1-9]\d{0,3})(?:\.\d{1,3})?(?:px|rem|em|%)$/;
+const LENGTH = /^(?:0|[1-9]\d{0,3})(?:\.\d{1,3})?(?:px|rem|em|pt|%)$/;
 
 export type ColorToken = { id: string; name: string; value: string };
 export type FontToken = { id: string; name: string; stack: string };
@@ -45,6 +49,7 @@ export type DesignSystemFile = {
     margin: SpacingToken[];
   };
   radius: RadiusToken[];
+  units: UnitSettings;
 };
 
 export type GroupId = "color" | "font" | "type" | "padding" | "gap" | "margin" | "radius";
@@ -181,6 +186,7 @@ export function openingDesignSystem(): DesignSystemFile {
       margin: [{ id: "margin-screen", name: "Screen", mobile: "16px", desktop: "32px" }],
     },
     radius: [{ id: "radius-card", name: "Card", value: "1rem" }],
+    units: defaultUnitSettings(),
   };
 }
 
@@ -219,6 +225,7 @@ function readFile(data: Record<string, unknown>): DesignSystemFile | null {
   const spacing = readSpacing(data.spacing);
   const radius = readRadius(data.radius);
   if (!colors || !fonts || !typeStyles || !spacing || !radius) return null;
+  const units = readUnitSettings(data.units);
   const ids = [
     ...colors.map((item) => item.id),
     ...fonts.map((item) => item.id),
@@ -241,6 +248,7 @@ function readFile(data: Record<string, unknown>): DesignSystemFile | null {
     typeStyles,
     spacing,
     radius,
+    units,
   };
 }
 
@@ -378,6 +386,7 @@ export function sanitizeDesignSystem(file: DesignSystemFile): DesignSystemFile {
       margin: file.spacing.margin.map(sanitizeSpacing),
     },
     radius: file.radius.map((token) => ({ ...token, value: safeLength(token.value, "0px") })),
+    units: readUnitSettings(file.units),
   };
 }
 

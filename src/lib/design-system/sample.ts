@@ -5,6 +5,7 @@ import {
   type DesignSystemFile,
   type SpacingToken,
 } from "./model.ts";
+import { cssLength, lengthEquivalents, readUnitSettings, typeSizeCss } from "./units.ts";
 
 export type Viewport = "mobile" | "desktop";
 
@@ -19,6 +20,7 @@ export type SampleMessage = {
     fontName: string;
     family: string;
     sizePt: number;
+    sizeCss: string;
     lineHeight: number;
     weight: number;
   }[];
@@ -80,10 +82,15 @@ export function buildSampleMessage(file: DesignSystemFile, viewport: Viewport): 
   const gap = byName(file.spacing.gap, "Tight");
   const margin = byName(file.spacing.margin, "Screen");
   const radius = byName(file.radius, "Card");
+  const units = readUnitSettings(file.units);
   const padValue = spacingCurrent(pad, viewport);
   const gapValue = spacingCurrent(gap, viewport);
   const marginValue = spacingCurrent(margin, viewport);
   const radiusValue = radius ? safeLength(radius.value, "0px") : "0px";
+  const padCss = cssLength(padValue, units, "spacing");
+  const gapCss = cssLength(gapValue, units, "spacing");
+  const marginCss = cssLength(marginValue, units, "spacing");
+  const radiusCss = cssLength(radiusValue, units, "radius");
 
   return {
     type: "cc-sample",
@@ -93,10 +100,11 @@ export function buildSampleMessage(file: DesignSystemFile, viewport: Viewport): 
       "--ink": ink ? safeColor(ink.value, "#1c1917") : "#1c1917",
       "--muted": muted ? safeColor(muted.value, "#78716c") : "#78716c",
       "--brand": brand ? safeColor(brand.value, "#9a3412") : file.colors[0] ? safeColor(file.colors[0].value) : "#9a3412",
-      "--margin": marginValue,
-      "--pad": padValue,
-      "--gap": gapValue,
-      "--radius": radiusValue,
+      "--margin": marginCss,
+      "--pad": padCss,
+      "--gap": gapCss,
+      "--radius": radiusCss,
+      "--root-px": `${units.rootPx}px`,
     },
     swatches: file.colors.map((color) => ({
       name: color.name,
@@ -110,19 +118,20 @@ export function buildSampleMessage(file: DesignSystemFile, viewport: Viewport): 
         fontName: font?.name ?? "Missing font",
         family: safeStack(font?.stack ?? ""),
         sizePt: style.sizePt,
+        sizeCss: typeSizeCss(style.sizePt, units),
         lineHeight: style.lineHeight,
         weight: style.weight,
       };
     }),
     stack: {
-      pad: padValue,
-      gap: gapValue,
-      margin: marginValue,
-      radius: radiusValue,
-      padNote: pad ? `Comfortable padding · ${padValue}` : "Missing: Comfortable (padding).",
-      gapNote: gap ? `Tight gap · ${gapValue}` : "Missing: Tight (gap).",
-      marginNote: margin ? `Screen margin · ${marginValue}` : "Missing: Screen (margin).",
-      radiusNote: radius ? `Card radius · ${radiusValue}` : "Missing: Card (radius).",
+      pad: padCss,
+      gap: gapCss,
+      margin: marginCss,
+      radius: radiusCss,
+      padNote: pad ? `Comfortable padding · ${padValue} · ${lengthEquivalents(padValue, units, "spacing")}` : "Missing: Comfortable (padding).",
+      gapNote: gap ? `Tight gap · ${gapValue} · ${lengthEquivalents(gapValue, units, "spacing")}` : "Missing: Tight (gap).",
+      marginNote: margin ? `Screen margin · ${marginValue} · ${lengthEquivalents(marginValue, units, "spacing")}` : "Missing: Screen (margin).",
+      radiusNote: radius ? `Card radius · ${radiusValue} · ${lengthEquivalents(radiusValue, units, "radius")}` : "Missing: Card (radius).",
     },
   };
 }

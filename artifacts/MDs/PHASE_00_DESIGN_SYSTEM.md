@@ -47,6 +47,7 @@ Opening values:
 - Gap: Tight `8px / 12px`, Comfortable `16px / 24px`
 - Margin: Screen `16px / 32px`
 - Radius: Card `1rem`
+- Units: root 16px, type `1rem = 16pt`, radius `1rem = 16px`. CSS print preset sets type to `1rem = 12pt`. See `UNITS_AND_CANVAS.md`.
 
 A file that is not `kind: "design-system"` and `schemaVersion: 2` is rejected: `This file is not a design system. Open it on its own shelf.`
 

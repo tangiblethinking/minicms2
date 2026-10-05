@@ -72,3 +72,14 @@ test("the sample switches Comfortable padding with the viewport", () => {
   assert.equal(h1?.sizePt, 36);
   assert.equal(h1?.fontName, "Display");
 });
+
+test("a saved file without units keeps the logical 1rem = 16pt standard", () => {
+  const file = openingDesignSystem();
+  const { units: _units, ...without } = file;
+  const parsed = parseDesignSystemJson(JSON.stringify(without));
+  assert.equal(parsed.ok, true);
+  if (!parsed.ok) return;
+  assert.equal(parsed.file.units.fontPtPerRem, 16);
+  assert.equal(parsed.file.units.radiusPxPerRem, 16);
+  assert.equal(parsed.file.units.rootPx, 16);
+});

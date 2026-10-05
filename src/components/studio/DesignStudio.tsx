@@ -131,8 +131,8 @@ export function DesignStudio() {
         <aside
           className={
             pane === "library"
-              ? "flex min-h-0 min-w-0 flex-1 flex-col bg-studio lg:w-rail lg:flex-none lg:shrink-0 lg:border-r lg:border-line"
-              : "hidden min-h-0 min-w-0 bg-studio lg:flex lg:w-rail lg:flex-none lg:shrink-0 lg:border-r lg:border-line"
+              ? "flex min-h-0 min-w-0 w-full flex-1 flex-col overflow-x-hidden bg-studio lg:w-rail lg:max-w-rail lg:flex-none lg:shrink-0 lg:border-r lg:border-line"
+              : "hidden min-h-0 min-w-0 overflow-x-hidden bg-studio lg:flex lg:w-rail lg:max-w-rail lg:flex-none lg:shrink-0 lg:border-r lg:border-line"
           }
         >
           <LibraryRail onPick={() => setPane("selection")} />

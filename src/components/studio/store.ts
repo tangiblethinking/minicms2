@@ -20,6 +20,7 @@ import {
   type TypeStyle,
 } from "@/lib/design-system/model";
 import type { Viewport } from "@/lib/design-system/sample";
+import { convertLength, type SwapUnit, type UnitSettings } from "@/lib/design-system/units";
 
 const opening = openingDesignSystem();
 
@@ -47,6 +48,7 @@ type StudioState = {
     patch: Partial<Pick<SpacingToken, "name" | "mobile" | "desktop">>,
   ) => void;
   updateRadius: (id: string, patch: Partial<Pick<RadiusToken, "name" | "value">>) => void;
+  updateUnits: (patch: Partial<UnitSettings>, rewrite?: "spacing" | "radius") => void;
   add: () => void;
   removeSelected: () => void;
   save: () => Promise<void>;
@@ -112,6 +114,26 @@ export const useStudio = create<StudioState>((set, get) => ({
         radius: state.file.radius.map((item) => (item.id === id ? { ...item, ...patch } : item)),
       }),
     ),
+  updateUnits: (patch, rewrite) =>
+    set((state) => {
+      const units = { ...state.file.units, ...patch };
+      const file = { ...state.file, units };
+      if (rewrite === "spacing") {
+        const unit = units.spacingUnit;
+        file.spacing = {
+          padding: file.spacing.padding.map((item) => rewriteSpacing(item, unit, units)),
+          gap: file.spacing.gap.map((item) => rewriteSpacing(item, unit, units)),
+          margin: file.spacing.margin.map((item) => rewriteSpacing(item, unit, units)),
+        };
+      }
+      if (rewrite === "radius") {
+        file.radius = file.radius.map((item) => ({
+          ...item,
+          value: convertLength(item.value, units.radiusUnit, units, "radius"),
+        }));
+      }
+      return edited(file);
+    }),
   add: () => {
     const { file, group } = get();
     const next = addToGroup(file, group);
@@ -199,4 +221,12 @@ export function useSelection() {
   const group = useStudio((state) => state.group);
   const selectedId = useStudio((state) => state.selectedId);
   return useMemo(() => findSelection(file, group, selectedId), [file, group, selectedId]);
+}
+
+function rewriteSpacing(token: SpacingToken, unit: SwapUnit, units: UnitSettings): SpacingToken {
+  return {
+    ...token,
+    mobile: convertLength(token.mobile, unit, units, "spacing"),
+    desktop: convertLength(token.desktop, unit, units, "spacing"),
+  };
 }
